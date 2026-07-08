@@ -1,0 +1,11 @@
+import type { Metadata } from 'next'
+import { RegisterScreen } from '@/features/auth/components/register-screen'
+
+export const metadata: Metadata = {
+  title: 'Create account',
+  description: 'Create your account.',
+}
+
+export default function RegisterPage() {
+  return <RegisterScreen />
+}
