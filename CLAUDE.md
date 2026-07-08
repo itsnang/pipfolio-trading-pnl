@@ -86,12 +86,9 @@ Route protection is handled centrally in `src/proxy.ts` (Next.js 16's middleware
 
 ### Environment variables
 
-Two separate modules enforce the server/client boundary:
+`src/env.ts` — server-only (imports `server-only`), Zod-validated. Import this in Server Components and actions; add new server vars as commented-out lines here.
 
-- `src/env.ts` — server-only (imports `server-only`). Import this in Server Components and actions.
-- `src/env.client.ts` — safe for Client Components. Only `NEXT_PUBLIC_*` vars.
-
-**Never import `src/env.ts` from a Client Component.** Add new server vars as commented-out lines in `src/env.ts`; add `NEXT_PUBLIC_*` vars to `src/env.client.ts`.
+**Never import `src/env.ts` from a Client Component** — the `server-only` import makes that a build error. If a Client Component needs a `NEXT_PUBLIC_*` var, add a sibling `src/env.client.ts` (no `server-only` guard, Zod schema scoped to `NEXT_PUBLIC_*` vars only) rather than relaxing `env.ts`'s guard.
 
 ### TanStack Query v5
 
