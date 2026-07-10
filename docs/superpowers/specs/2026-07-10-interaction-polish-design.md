@@ -8,30 +8,17 @@ Explicitly out of scope (considered and rejected during brainstorming): elevatio
 
 ## Design
 
-### 1. Quick-add FAB
+### 1. Onboarding gate (supersedes the original quick-add FAB)
 
-**Problem:** the day-dialog is currently owned by local `useState` inside `journal-view.tsx`, so it only exists on the Journal screen. A FAB reachable from both Journal and Accounts needs the dialog's open/close state lifted above both.
+**Revision note:** the FAB plan below was implemented and then dropped mid-build in favor of this — a zero-account user has no meaningful action to take from a FAB anyway (nothing to log against), so the real fix is gating the app until an account exists, not adding a shortcut around the gap.
 
-**Store:** `src/features/trades/store/day-dialog.store.ts` — a zustand store, since this is cross-screen client business state per the project's store conventions:
+**Problem:** a brand-new user with zero trading accounts previously saw a working-looking but functionally empty Journal/Accounts UI, with no clear prompt to create an account first.
 
-```ts
-interface DayDialogState {
-  date: string | null
-  open: (date: string) => void
-  close: () => void
-}
-```
+**Solution:** `src/app/(app)/onboarding-gate.tsx` (`'use client'`) — reads `useAccounts()`; while `isPending` it renders nothing, and once resolved, if `accounts.length === 0` it renders a fixed, full-screen `bg-black/40 backdrop-blur-md` overlay with a centered card containing the account-creation form. The blurred backdrop lets the (non-interactive, `pointer-events` blocked by the overlay) Journal/Accounts UI stay visible underneath, communicating "your app is right here, you just need an account first." The overlay has no close button and no click-outside-to-dismiss — it clears itself automatically once `useAccounts()` refetches with a non-empty list after account creation.
 
-**Global mount:** a new route-scoped component `src/app/(app)/quick-add.tsx` (`'use client'`) renders the FAB button and a single `<DayDialog>` instance driven by the store. `src/app/(app)/layout.tsx` renders `<QuickAdd />` as a sibling to `<AppShell>` (fixed positioning doesn't depend on DOM nesting, so this doesn't require threading it through the shared shell component — `AppShell` stays generic and slice-agnostic per CLAUDE.md).
+Mounted in `src/app/(app)/layout.tsx` as `<AppShell>{children}<OnboardingGate /></AppShell>`.
 
-**Journal wiring:** `journal-view.tsx` drops its local `selectedDay` state and its own `<DayDialog>` render; calendar day-cell taps call `useDayDialogStore().open(date)` instead, and `JournalScreen`'s `selectedDate` prop reads from the store instead of local state. No other behavior on that screen changes.
-
-**FAB appearance/behavior:**
-- Circular, `bg-clay text-white`, same fill as the existing Accounts "Add" button — no new colors.
-- Fixed position: `bottom-24 right-4` (clears the sticky bottom nav + safe-area inset).
-- Tapping it opens the day-dialog for **today's date**, using the currently selected account (`useSelectedAccountStore`).
-- Hidden entirely when the user has zero accounts (via `useAccounts()`) — there's nothing to log against, so no dead-end tap.
-- Rendered only within the `(app)` route group, so it never appears on `/login` or `/register`.
+**Form reuse:** the account-creation form was extracted from `add-account-sheet.tsx` into `src/features/accounts/components/add-account-form.tsx` (`AddAccountForm`, takes an optional `onSuccess`), since both the gate and the existing "Add account" bottom sheet need the identical fields/validation/submit logic. `AddAccountSheet` is now a thin wrapper: `<BottomSheet><AddAccountForm onSuccess={onClose} /></BottomSheet>`. The gate uses `AddAccountForm` with no `onSuccess` — it doesn't need to imperatively close itself, since it unmounts naturally once the accounts query reflects the new account.
 
 ### 2. Toast feedback
 
@@ -58,4 +45,4 @@ All transitions use `transition-transform` already available via existing `trans
 ## Testing
 
 - `npx tsc --noEmit`, `npm run lint`, `npm run build` as the standard quality gate (per CLAUDE.md — no test runner configured).
-- Manual Playwright smoke test: FAB visible/hidden correctly (zero vs. 1+ accounts), FAB opens today's day-dialog from both Journal and Accounts, calendar taps still open the correct day, success toast appears on save/delete, press states are visually present on tap.
+- Manual Playwright smoke test (performed): registered a fresh zero-account user, confirmed the onboarding gate renders blurred/blocking on Journal, created an account through the gate's form, confirmed the gate closes and the account appears; then opened the day-dialog via a calendar tap, logged a trade, and confirmed the success toast, calendar/hero update, and press-state styling all work.
