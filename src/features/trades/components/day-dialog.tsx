@@ -6,7 +6,7 @@ import { Separator } from '@/components/ui/separator'
 import { cn } from '@/lib/utils'
 import { formatDateWithWeekday, formatPnl } from '@/lib/format'
 import { useDayTrades } from '../hooks/use-day-trades'
-import { TradeList } from './trade-list'
+import { TradeList, TradeListSkeleton } from './trade-list'
 import { QuickPnlForm } from './quick-pnl-form'
 import { CalcForm } from './calc-form'
 
@@ -26,7 +26,7 @@ interface DayDialogProps {
 
 export function DayDialog({ open, onClose, date, accountId }: DayDialogProps) {
   const [mode, setMode] = useState<FormMode>('quick')
-  const { data: trades = [] } = useDayTrades(accountId, date)
+  const { data: trades = [], isPending } = useDayTrades(accountId, date)
 
   const dayPnl = trades.reduce((sum, t) => sum + parseFloat(t.pnl), 0)
   const hasTrades = trades.length > 0
@@ -51,7 +51,9 @@ export function DayDialog({ open, onClose, date, accountId }: DayDialogProps) {
           </div>
         )}
 
-        {hasTrades ? (
+        {isPending ? (
+          <TradeListSkeleton />
+        ) : hasTrades ? (
           <TradeList trades={trades} accountId={accountId} date={date} />
         ) : (
           <p className="text-center text-[12.5px] font-medium text-muted-foreground">

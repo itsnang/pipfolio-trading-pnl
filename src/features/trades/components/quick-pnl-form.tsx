@@ -3,6 +3,7 @@
 import { useForm } from 'react-hook-form'
 import { zodResolver } from '@hookform/resolvers/zod'
 import { useQueryClient } from '@tanstack/react-query'
+import { Loader2 } from 'lucide-react'
 import { toast } from 'sonner'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
@@ -102,7 +103,16 @@ export function QuickPnlForm({ accountId, date, onSuccess }: QuickPnlFormProps) 
             : 'bg-red hover:bg-red/90',
         )}
       >
-        {isSubmitting ? 'Saving…' : result === 'win' ? 'Log win' : 'Log loss'}
+        {isSubmitting ? (
+          <>
+            <Loader2 className="size-4 animate-spin" />
+            Saving…
+          </>
+        ) : result === 'win' ? (
+          'Log win'
+        ) : (
+          'Log loss'
+        )}
       </Button>
     </form>
   )

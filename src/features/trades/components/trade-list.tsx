@@ -3,10 +3,26 @@
 import { useState } from 'react'
 import { useQueryClient } from '@tanstack/react-query'
 import { toast } from 'sonner'
+import { Skeleton } from '@/components/ui/skeleton'
 import { deleteTrade } from '../actions'
 import { TradeItem } from './trade-item'
 import { invalidateTradeQueries } from '../utils'
 import type { Trade } from '../types'
+
+export function TradeListSkeleton() {
+  return (
+    <div className="flex flex-col gap-3">
+      {[0, 1].map((i) => (
+        <div key={i} className="flex items-center gap-3">
+          <Skeleton className="h-4.5 w-10 rounded-md" />
+          <Skeleton className="h-3 flex-1" />
+          <Skeleton className="h-4 w-12" />
+          <Skeleton className="size-4 rounded-full" />
+        </div>
+      ))}
+    </div>
+  )
+}
 
 interface TradeListProps {
   trades: Trade[]
