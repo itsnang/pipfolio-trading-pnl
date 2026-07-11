@@ -29,6 +29,13 @@
       "when": 1783767124912,
       "tag": "0003_add_domain_query_functions",
       "breakpoints": true
+    },
+    {
+      "idx": 4,
+      "version": "7",
+      "when": 1783767757107,
+      "tag": "0004_pin_domain_function_search_path",
+      "breakpoints": true
     }
   ]
 }
