@@ -17,9 +17,9 @@ export function Providers({ children }: { children: React.ReactNode }) {
     <ThemeProvider attribute="class" defaultTheme="system" enableSystem disableTransitionOnChange>
       <QueryClientProvider client={queryClient}>
         {children}
-        {/* {process.env.NODE_ENV !== 'production' && (
+        {process.env.NODE_ENV !== 'production' && (
           <ReactQueryDevtools initialIsOpen={false} />
-        )} */}
+        )}
         <NavigationProgress />
         <Toaster />
       </QueryClientProvider>
