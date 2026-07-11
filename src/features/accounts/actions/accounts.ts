@@ -1,83 +1,75 @@
 'use server'
 
 import { revalidatePath } from 'next/cache'
-import { supabase } from '@/lib/supabase/client'
+import { and, desc, eq, getTableColumns, sql } from 'drizzle-orm'
+import { db } from '@/lib/db/client'
+import { tradingAccount } from '@/lib/db/schema/trading-account.table'
+import { trade } from '@/lib/db/schema/trade.table'
 import { withAuthAction } from '@/lib/better-auth/middleware'
 import type { AddAccountInput } from '../schemas'
-import type { AccountWithStats } from '../types'
 
-interface AccountStatsRow {
-  id: string
-  user_id: string
-  name: string
-  broker: string | null
-  type: 'personal' | 'funded' | 'demo'
-  starting_balance: number | string
-  created_at: string
-  updated_at: string
-  total_pnl: number | string
-  trade_count: number | string
-  recent_count: number | string
-}
-
-export const getAccountsWithStats = withAuthAction(async ({ user }): Promise<AccountWithStats[]> => {
+export const getAccountsWithStats = withAuthAction(async ({ user }) => {
   const thirtyDaysAgo = new Date()
   thirtyDaysAgo.setDate(thirtyDaysAgo.getDate() - 30)
   const thirtyDaysAgoStr = thirtyDaysAgo.toISOString().slice(0, 10)
 
-  const { data, error } = await supabase.rpc('get_accounts_with_stats', {
-    p_user_id: user.id,
-    p_recent_since: thirtyDaysAgoStr,
-  })
-  if (error) throw new Error(error.message)
+  // Single grouped query instead of one stats round trip per account.
+  const rows = await db
+    .select({
+      ...getTableColumns(tradingAccount),
+      totalPnl: sql<string>`COALESCE(SUM(${trade.pnl}), 0)`,
+      tradeCount: sql<string>`COUNT(${trade.id})`,
+      recentCount: sql<string>`COUNT(${trade.id}) FILTER (WHERE ${trade.date} >= ${thirtyDaysAgoStr})`,
+    })
+    .from(tradingAccount)
+    .leftJoin(trade, and(eq(trade.accountId, tradingAccount.id), eq(trade.userId, user.id)))
+    .where(eq(tradingAccount.userId, user.id))
+    .groupBy(tradingAccount.id)
+    .orderBy(desc(tradingAccount.createdAt))
 
-  return (data as AccountStatsRow[]).map((row) => {
-    const startingBalance = String(row.starting_balance)
-    const totalPnl = String(row.total_pnl)
-    const currentBalance = (parseFloat(startingBalance) + parseFloat(totalPnl)).toFixed(2)
+  return rows.map((row) => {
+    const currentBalance = (
+      parseFloat(row.startingBalance) + parseFloat(row.totalPnl)
+    ).toFixed(2)
 
     return {
-      id: row.id,
-      userId: row.user_id,
-      name: row.name,
-      broker: row.broker,
-      type: row.type,
-      startingBalance,
-      createdAt: new Date(row.created_at),
-      updatedAt: new Date(row.updated_at),
-      totalPnl,
+      ...row,
       currentBalance,
-      tradeCount: Number(row.trade_count),
-      isActive: Number(row.recent_count) > 0,
+      tradeCount: parseInt(row.tradeCount),
+      isActive: parseInt(row.recentCount) > 0,
     }
   })
 })
 
 export const addAccount = withAuthAction(
   async ({ user }, input: AddAccountInput): Promise<{ error?: string }> => {
-    const { error } = await supabase.from('trading_account').insert({
-      id: crypto.randomUUID(),
-      user_id: user.id,
-      name: input.name,
-      broker: input.broker ?? null,
-      type: input.type,
-      starting_balance: input.startingBalance,
-    })
-    if (error) return { error: 'Failed to create account' }
-    revalidatePath('/accounts')
-    return {}
+    try {
+      await db.insert(tradingAccount).values({
+        id: crypto.randomUUID(),
+        userId: user.id,
+        name: input.name,
+        broker: input.broker ?? null,
+        type: input.type,
+        startingBalance: input.startingBalance,
+      })
+      revalidatePath('/accounts')
+      return {}
+    } catch {
+      return { error: 'Failed to create account' }
+    }
   },
 )
 
 export const deleteAccount = withAuthAction(
   async ({ user }, accountId: string): Promise<{ error?: string }> => {
-    const { error } = await supabase
-      .from('trading_account')
-      .delete()
-      .eq('id', accountId)
-      .eq('user_id', user.id)
-    if (error) return { error: 'Failed to delete account' }
-    revalidatePath('/accounts')
-    return {}
+    try {
+      await db
+        .delete(tradingAccount)
+        .where(and(eq(tradingAccount.id, accountId), eq(tradingAccount.userId, user.id)))
+      revalidatePath('/accounts')
+      return {}
+    } catch {
+      return { error: 'Failed to delete account' }
+    }
   },
 )
