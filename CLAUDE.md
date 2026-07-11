@@ -88,9 +88,10 @@ src/features/<domain>/
 
 ### Database schema
 
-Tables live in `src/lib/db/schema/`. Currently: `user`, `session`, `account`, `verification` (all better-auth managed). New domain tables (e.g. `trading_account`, `trade`) go here as new `*.table.ts` files, exported from `schema/index.ts`.
+Tables live in `src/lib/db/schema/`. Drizzle owns the schema/migration history for **all** tables (`user`, `session`, `account`, `verification`, `trading_account`, `trade`), but at runtime it is only queried by better-auth (`src/lib/better-auth/server.ts`'s `drizzleAdapter`) for its own four tables. Domain tables (`trading_account`, `trade`) are queried at runtime through the Supabase client (`src/lib/supabase/client.ts`, service-role key, manual `user_id` scoping in every call — see `src/features/accounts/actions/accounts.ts`, `src/features/trades/actions/trades.ts`, `src/features/journal/actions/journal.ts`).
 
-After adding a table: `npm run db:generate` → `npm run db:migrate`.
+After adding/changing a table: `npm run db:generate` → `npm run db:migrate`.
+To add or change a Postgres function called via `.rpc()`: `npx drizzle-kit generate --custom --name=<name>` to create an empty raw-SQL migration, write the `CREATE OR REPLACE FUNCTION ...` SQL by hand, then `npm run db:migrate`. This keeps Drizzle's migration history the single source of truth for the whole database, even for objects the Drizzle query builder never touches at runtime.
 
 ### Route groups
 
