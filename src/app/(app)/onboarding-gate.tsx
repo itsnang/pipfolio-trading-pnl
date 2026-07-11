@@ -3,7 +3,6 @@
 import { useAccounts } from '@/features/accounts/hooks/use-accounts'
 import { AddAccountForm } from '@/features/accounts/components/add-account-form'
 
-/** Blocks the app behind a blurred overlay until the user has at least one trading account. */
 export function OnboardingGate() {
   const { data: accounts, isPending } = useAccounts()
 

@@ -13,7 +13,6 @@ export const getAccountsWithStats = withAuthAction(async ({ user }) => {
   thirtyDaysAgo.setDate(thirtyDaysAgo.getDate() - 30)
   const thirtyDaysAgoStr = thirtyDaysAgo.toISOString().slice(0, 10)
 
-  // Single grouped query instead of one stats round trip per account.
   const rows = await db
     .select({
       ...getTableColumns(tradingAccount),

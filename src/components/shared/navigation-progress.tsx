@@ -11,7 +11,6 @@ export function NavigationProgress() {
   const pathname = usePathname()
   const prevPathRef = useRef(pathname)
 
-  // Stop when route changes complete
   useEffect(() => {
     if (prevPathRef.current !== pathname) {
       prevPathRef.current = pathname
@@ -19,7 +18,6 @@ export function NavigationProgress() {
     }
   }, [pathname])
 
-  // Start on link click — no timers shared with the stop path
   useEffect(() => {
     const handleClick = (e: MouseEvent) => {
       const anchor = (e.target as Element).closest<HTMLAnchorElement>('a[href]')

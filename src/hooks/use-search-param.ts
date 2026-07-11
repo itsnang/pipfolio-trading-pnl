@@ -3,12 +3,6 @@
 import { useCallback } from 'react'
 import { usePathname, useRouter, useSearchParams } from 'next/navigation'
 
-/**
- * Read and update a single URL query param from a client component. Updates use
- * `router.replace` (no extra history entry) and skip scrolling, so search and
- * filter state lives in the URL — shareable and restored on reload — without
- * jumping the page. An empty value removes the param to keep the URL clean.
- */
 export function useSearchParam(
   key: string
 ): readonly [string, (value: string) => void] {

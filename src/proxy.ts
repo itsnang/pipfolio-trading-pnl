@@ -9,7 +9,6 @@ function matchesPath(pathname: string, paths: string[]): boolean {
   return paths.some((path) => pathname === path || pathname.startsWith(`${path}/`))
 }
 
-// Cookie presence only (no DB round trip) — requireSession() re-verifies the real session server-side.
 function isAuthenticated(request: NextRequest): boolean {
   return !!getSessionCookie(request)
 }

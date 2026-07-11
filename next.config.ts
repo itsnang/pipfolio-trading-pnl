@@ -7,13 +7,11 @@ const nextConfig: NextConfig = {
 
   images: {
     formats: ["image/avif", "image/webp"],
-    // Mobile-first viewport breakpoints
     deviceSizes: [390, 430, 768, 1024, 1280],
     imageSizes: [64, 128, 256, 384],
   },
 
   experimental: {
-    // Tree-shake large barrel-file packages at build time
     optimizePackageImports: ["framer-motion", "radix-ui", "lucide-react"],
   },
 

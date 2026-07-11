@@ -5,7 +5,6 @@ interface AppLogoProps {
   className?: string
 }
 
-/** Pipfolio brand mark: an ascending bar chart, used on the login/register screens. */
 export function AppLogo({ className }: AppLogoProps) {
   const gradientId = useId()
 

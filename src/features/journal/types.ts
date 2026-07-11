@@ -1,4 +1,3 @@
-/** Minimal account shape needed by the journal screen's account selector */
 export interface AccountWithStatsLike {
   id: string
   name: string

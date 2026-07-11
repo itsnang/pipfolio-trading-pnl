@@ -4,11 +4,6 @@ import { useTheme } from 'next-themes'
 import { Moon, Sun } from 'lucide-react'
 import { useMounted } from '@/hooks/use-mounted'
 
-/**
- * Icon button that flips between light and dark, matching the mockup's top-right
- * theme toggle. Uses next-themes (the project's ThemeProvider) and a mounted
- * guard so the icon doesn't mismatch during hydration.
- */
 export function ThemeToggle() {
   const { resolvedTheme, setTheme } = useTheme()
   const mounted = useMounted()

@@ -19,7 +19,6 @@ export function formatBalance(value: number | string): string {
   }).format(n)
 }
 
-/** Compact signed P&L for tight spaces, e.g. "+12k", "-1.4k", "+340". */
 export function formatPnlShort(value: number | string): string {
   const n = typeof value === 'string' ? parseFloat(value) : value
   const abs = Math.abs(n)

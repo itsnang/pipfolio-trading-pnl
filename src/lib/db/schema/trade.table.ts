@@ -29,8 +29,6 @@ export const trade = pgTable(
   },
   (table) => [
     index('trade_user_id_idx').on(table.userId),
-    // Every trade query filters accountId + a date (range), so index the pair
-    // directly rather than making Postgres bitmap-AND two separate indexes.
     index('trade_account_id_date_idx').on(table.accountId, table.date),
   ],
 )

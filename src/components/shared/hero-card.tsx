@@ -8,7 +8,6 @@ interface HeroCardProps {
   className?: string
 }
 
-/** Fixed dark "spotlight" card with a clay radial glow — stays dark in both themes. */
 export function HeroCard({ label, value, trailing, className }: HeroCardProps) {
   return (
     <div
