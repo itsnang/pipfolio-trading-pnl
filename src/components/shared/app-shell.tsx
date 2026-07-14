@@ -7,12 +7,44 @@ import { cn } from '@/lib/utils'
 import { signOut } from '@/lib/better-auth/client'
 import { AppLogo } from './app-logo'
 
+interface AppShellUser {
+  name: string
+  image: string | null
+}
+
+interface AppShellProps {
+  children: React.ReactNode
+  user: AppShellUser
+}
+
+function NavAvatar({ user, size }: { user: AppShellUser; size: number }) {
+  const initial = user.name.charAt(0).toUpperCase()
+  return (
+    <div
+      className="overflow-hidden rounded-full bg-clay/20"
+      style={{ width: size, height: size }}
+    >
+      {user.image ? (
+        <img src={user.image} alt={user.name} className="h-full w-full object-cover" />
+      ) : (
+        <div
+          className="flex h-full w-full items-center justify-center font-extrabold text-clay"
+          style={{ fontSize: Math.round(size * 0.42) }}
+        >
+          {initial}
+        </div>
+      )}
+    </div>
+  )
+}
+
 const tabs = [
   { href: '/journal', label: 'Journal', icon: CalendarDays },
   { href: '/accounts', label: 'Accounts', icon: Wallet },
-]
+  { href: '/profile', label: 'Profile', icon: null },
+] as const
 
-export function AppShell({ children }: { children: React.ReactNode }) {
+export function AppShell({ children, user }: AppShellProps) {
   const pathname = usePathname()
   const router = useRouter()
 
@@ -37,7 +69,11 @@ export function AppShell({ children }: { children: React.ReactNode }) {
                   active ? 'bg-clay/10 text-clay' : 'text-muted-foreground hover:bg-hair hover:text-foreground',
                 )}
               >
-                <Icon size={20} strokeWidth={active ? 2.2 : 1.8} />
+                {Icon ? (
+                  <Icon size={20} strokeWidth={active ? 2.2 : 1.8} />
+                ) : (
+                  <NavAvatar user={user} size={20} />
+                )}
                 {label}
               </Link>
             )
@@ -70,7 +106,11 @@ export function AppShell({ children }: { children: React.ReactNode }) {
                     active ? 'text-clay' : 'text-muted-foreground',
                   )}
                 >
-                  <Icon size={22} strokeWidth={active ? 2.2 : 1.8} />
+                  {Icon ? (
+                    <Icon size={22} strokeWidth={active ? 2.2 : 1.8} />
+                  ) : (
+                    <NavAvatar user={user} size={22} />
+                  )}
                   {label}
                 </Link>
               )
