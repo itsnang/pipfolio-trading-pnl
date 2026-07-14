@@ -66,8 +66,8 @@ export function ProfileScreen({ user }: ProfileScreenProps) {
         </button>
       </div>
 
-      {/* Sign out */}
-      <div className="mt-4 px-5 pb-4">
+      {/* Sign out — desktop sidebar has its own, so this is mobile-only */}
+      <div className="mt-4 px-5 pb-4 md:hidden">
         <Separator className="mb-6" />
         <Button variant="outline" className="w-full" onClick={handleSignOut}>
           Sign out
