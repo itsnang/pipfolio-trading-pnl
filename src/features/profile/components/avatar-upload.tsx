@@ -2,7 +2,6 @@
 
 import { useEffect, useRef, useState } from 'react'
 import { Camera } from 'lucide-react'
-import { cn } from '@/lib/utils'
 
 interface AvatarUploadProps {
   currentUrl: string | null
@@ -39,28 +38,27 @@ export function AvatarUpload({ currentUrl, name, onChange, size = 80 }: AvatarUp
     <button
       type="button"
       onClick={() => inputRef.current?.click()}
-      className="group relative shrink-0 overflow-hidden rounded-full focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-clay"
+      className="group relative shrink-0 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-clay"
       style={{ width: size, height: size }}
       aria-label="Change profile photo"
     >
-      {displayUrl ? (
-        <img
-          src={displayUrl}
-          alt={name}
-          className="h-full w-full object-cover"
-        />
-      ) : (
-        <div
-          className={cn(
-            'flex h-full w-full items-center justify-center bg-clay/20 font-extrabold text-clay',
-          )}
-          style={{ fontSize: size * 0.35 }}
-        >
-          {initial}
-        </div>
-      )}
-      <div className="absolute inset-0 flex items-center justify-center rounded-full bg-black/40 opacity-0 transition-opacity group-hover:opacity-100">
-        <Camera size={size * 0.28} className="text-white" />
+      <div className="h-full w-full overflow-hidden rounded-full">
+        {displayUrl ? (
+          <img src={displayUrl} alt={name} className="h-full w-full object-cover" />
+        ) : (
+          <div
+            className="flex h-full w-full items-center justify-center bg-clay/20 font-extrabold text-clay"
+            style={{ fontSize: size * 0.35 }}
+          >
+            {initial}
+          </div>
+        )}
+      </div>
+      <div
+        className="absolute flex items-center justify-center rounded-full bg-clay shadow-sm"
+        style={{ width: size * 0.3, height: size * 0.3, right: 0, bottom: 0 }}
+      >
+        <Camera size={size * 0.14} className="text-white" strokeWidth={2.5} />
       </div>
       <input
         ref={inputRef}

@@ -21,7 +21,7 @@ export default async function AppLayout({ children }: { children: ReactNode }) {
   await queryClient.prefetchQuery(accountsQueryOptions())
 
   return (
-    <AppShell user={{ name: user.name, image: user.image ?? null }}>
+    <AppShell>
       <HydrationBoundary state={dehydrate(queryClient)}>
         {children}
         <AccountSelectionSync />
