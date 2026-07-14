@@ -1,11 +1,7 @@
 'use client'
 
 import { useState } from 'react'
-import { useRouter } from 'next/navigation'
 import { Archive, Plus } from 'lucide-react'
-import { signOut } from '@/lib/better-auth/client'
-import { Button } from '@/components/ui/button'
-import { Separator } from '@/components/ui/separator'
 import { ThemeToggle } from '@/components/shared/theme-toggle'
 import { useSelectedAccountStore } from '../store/accounts.store'
 import { useAccounts } from '../hooks/use-accounts'
@@ -16,17 +12,12 @@ import { AccountSheet } from './account-sheet'
 import { ArchivedAccountsSheet } from './archived-accounts-sheet'
 
 export function AccountsScreen() {
-  const router = useRouter()
   const { data: accounts = [] } = useAccounts()
   const [addOpen, setAddOpen] = useState(false)
   const [archivedOpen, setArchivedOpen] = useState(false)
   const { selectedAccountId, setSelectedAccountId } = useSelectedAccountStore()
 
   const typeTotals = groupTotalsByType(accounts)
-
-  const handleSignOut = () => {
-    signOut({ fetchOptions: { onSuccess: () => router.push('/login') } })
-  }
 
   return (
     <div className="flex flex-col">
@@ -59,7 +50,7 @@ export function AccountsScreen() {
         </div>
       </div>
 
-      {/* Per-type totals — balances/P&L are never blended across account types */}
+      {/* Per-type totals */}
       <AccountTypeTotals totals={typeTotals} />
 
       {/* Account list */}
@@ -78,17 +69,6 @@ export function AccountsScreen() {
             />
           ))
         )}
-      </div>
-
-      {/* Sign out — desktop/tablet sidebar has its own, so this is mobile-only */}
-      <div className="mt-8 px-5 pb-4 md:hidden">
-        <Separator className="mb-6" />
-        <Button variant="outline" className="w-full" onClick={handleSignOut}>
-          Sign out
-        </Button>
-        <p className="mt-4 text-center text-[11px] text-muted-foreground">
-          © {new Date().getFullYear()} Pipfolio · Built by Chhay
-        </p>
       </div>
 
       <AccountSheet open={addOpen} onClose={() => setAddOpen(false)} />
