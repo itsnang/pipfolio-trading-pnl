@@ -1,6 +1,6 @@
 'use client'
 
-import { useRef, useState } from 'react'
+import { useEffect, useRef, useState } from 'react'
 import { Camera } from 'lucide-react'
 import { cn } from '@/lib/utils'
 
@@ -14,6 +14,13 @@ interface AvatarUploadProps {
 export function AvatarUpload({ currentUrl, name, onChange, size = 80 }: AvatarUploadProps) {
   const inputRef = useRef<HTMLInputElement>(null)
   const [previewUrl, setPreviewUrl] = useState<string | null>(null)
+  const prevPreviewRef = useRef<string | null>(null)
+
+  useEffect(() => {
+    return () => {
+      if (prevPreviewRef.current) URL.revokeObjectURL(prevPreviewRef.current)
+    }
+  }, [])
 
   const displayUrl = previewUrl ?? currentUrl
   const initial = name.charAt(0).toUpperCase() || '?'
@@ -21,7 +28,10 @@ export function AvatarUpload({ currentUrl, name, onChange, size = 80 }: AvatarUp
   const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0]
     if (!file) return
-    setPreviewUrl(URL.createObjectURL(file))
+    if (prevPreviewRef.current) URL.revokeObjectURL(prevPreviewRef.current)
+    const url = URL.createObjectURL(file)
+    prevPreviewRef.current = url
+    setPreviewUrl(url)
     onChange(file)
   }
 
@@ -49,7 +59,6 @@ export function AvatarUpload({ currentUrl, name, onChange, size = 80 }: AvatarUp
           {initial}
         </div>
       )}
-      {/* Hover overlay */}
       <div className="absolute inset-0 flex items-center justify-center rounded-full bg-black/40 opacity-0 transition-opacity group-hover:opacity-100">
         <Camera size={size * 0.28} className="text-white" />
       </div>

@@ -2,6 +2,7 @@
 
 import { useState } from 'react'
 import { useRouter } from 'next/navigation'
+import { toast } from 'sonner'
 import { signOut } from '@/lib/better-auth/client'
 import { ThemeToggle } from '@/components/shared/theme-toggle'
 import { Button } from '@/components/ui/button'
@@ -18,8 +19,16 @@ export function ProfileScreen({ user }: ProfileScreenProps) {
   const [editOpen, setEditOpen] = useState(false)
   const initial = user.name.charAt(0).toUpperCase()
 
-  const handleSignOut = () => {
-    signOut({ fetchOptions: { onSuccess: () => router.push('/login') } })
+  const handleSignOut = async () => {
+    try {
+      await signOut({
+        fetchOptions: {
+          onSuccess: () => router.push('/login'),
+        },
+      })
+    } catch {
+      toast.error('Sign out failed. Please try again.')
+    }
   }
 
   return (

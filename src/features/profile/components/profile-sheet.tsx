@@ -1,6 +1,6 @@
 'use client'
 
-import { useState } from 'react'
+import { useEffect, useState } from 'react'
 import { useRouter } from 'next/navigation'
 import { useForm } from 'react-hook-form'
 import { zodResolver } from '@hookform/resolvers/zod'
@@ -33,6 +33,10 @@ export function ProfileSheet({ user, open, onClose }: ProfileSheetProps) {
     resolver: zodResolver(editProfileSchema),
     defaultValues: { name: user.name },
   })
+
+  useEffect(() => {
+    reset({ name: user.name })
+  }, [user.name, reset])
 
   const onSubmit = async (values: EditProfileInput) => {
     let imageUrl: string | undefined
