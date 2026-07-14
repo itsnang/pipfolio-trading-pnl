@@ -44,7 +44,7 @@ export function AccountsScreen() {
             type="button"
             aria-label="View archived accounts"
             onClick={() => setArchivedOpen(true)}
-            className="flex items-center justify-center rounded-xl p-2 text-muted-foreground transition-colors hover:bg-hair hover:text-foreground active:scale-90"
+            className="grid h-[38px] w-[38px] place-items-center rounded-lg bg-muted text-muted-foreground transition-colors hover:text-foreground active:scale-90"
           >
             <Archive size={16} />
           </button>
