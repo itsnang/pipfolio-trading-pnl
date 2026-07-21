@@ -1,7 +1,7 @@
 'use client'
 
 import { useState } from 'react'
-import { Archive, MoreHorizontal, Pencil, Wallet } from 'lucide-react'
+import { Archive, ArrowUpFromLine, MoreHorizontal, Pencil, Wallet } from 'lucide-react'
 import { cn } from '@/lib/utils'
 import { formatBalance, formatPnl } from '@/lib/format'
 import { Separator } from '@/components/ui/separator'
@@ -14,6 +14,7 @@ import {
 import { AccountSheet } from './account-sheet'
 import { ArchiveAccountAlert } from './archive-account-alert'
 import { DepositSheet } from './deposit-sheet'
+import { WithdrawSheet } from './withdraw-sheet'
 import { typeBadge } from '../utils'
 import type { AccountWithStats } from '../types'
 
@@ -31,6 +32,7 @@ export function AccountCard({ account, isSelected, onSelect }: AccountCardProps)
   const [editOpen, setEditOpen] = useState(false)
   const [archiveOpen, setArchiveOpen] = useState(false)
   const [depositOpen, setDepositOpen] = useState(false)
+  const [withdrawOpen, setWithdrawOpen] = useState(false)
 
   return (
     <>
@@ -90,6 +92,10 @@ export function AccountCard({ account, isSelected, onSelect }: AccountCardProps)
                 <Wallet size={14} />
                 Add deposit
               </DropdownMenuItem>
+              <DropdownMenuItem onSelect={() => setWithdrawOpen(true)}>
+                <ArrowUpFromLine size={14} />
+                Withdraw
+              </DropdownMenuItem>
               <DropdownMenuItem onSelect={() => setEditOpen(true)}>
                 <Pencil size={14} />
                 Edit account
@@ -140,6 +146,7 @@ export function AccountCard({ account, isSelected, onSelect }: AccountCardProps)
       <AccountSheet account={account} open={editOpen} onClose={() => setEditOpen(false)} />
       <ArchiveAccountAlert account={account} open={archiveOpen} onClose={() => setArchiveOpen(false)} />
       <DepositSheet accountId={account.id} open={depositOpen} onClose={() => setDepositOpen(false)} />
+      <WithdrawSheet accountId={account.id} open={withdrawOpen} onClose={() => setWithdrawOpen(false)} />
     </>
   )
 }
