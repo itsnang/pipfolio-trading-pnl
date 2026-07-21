@@ -1,8 +1,9 @@
 'use client'
 
+import { useState } from 'react'
 import Link from 'next/link'
 import { ChevronRight } from 'lucide-react'
-import { motion } from 'framer-motion'
+import { motion, AnimatePresence } from 'framer-motion'
 import { shiftMonth, formatMonthLabel } from '@/lib/format'
 import { ThemeToggle } from '@/components/shared/theme-toggle'
 import { UserAvatar } from '@/components/shared/user-avatar'
@@ -25,6 +26,12 @@ interface JournalScreenProps {
 }
 
 
+const slideVariants = {
+  enter: (dir: number) => ({ x: dir >= 0 ? '100%' : '-100%', opacity: 0 }),
+  center: { x: 0, opacity: 1 },
+  exit: (dir: number) => ({ x: dir >= 0 ? '-100%' : '100%', opacity: 0 }),
+}
+
 export function JournalScreen({
   accountId,
   month,
@@ -34,6 +41,7 @@ export function JournalScreen({
   accounts,
   user,
 }: JournalScreenProps) {
+  const [direction, setDirection] = useState(0)
   const effectiveAccountId = accountId ?? ''
 
   const { data } = useMonthJournal(effectiveAccountId, month)
@@ -85,14 +93,16 @@ export function JournalScreen({
 
       <div className="flex flex-col lg:flex-row lg:items-start">
         <motion.div
-          className="relative flex-1 lg:min-w-0"
+          className="relative flex-1 overflow-hidden lg:min-w-0"
           onPanEnd={(_event, info) => {
             const isHorizontal = Math.abs(info.offset.x) > Math.abs(info.offset.y) * 1.5
             const isFastEnough = Math.abs(info.velocity.x) > 200 || Math.abs(info.offset.x) > 60
             if (!isHorizontal || !isFastEnough) return
             if (info.offset.x < 0) {
+              setDirection(1)
               onMonthChange(shiftMonth(month, 1))
             } else {
+              setDirection(-1)
               onMonthChange(shiftMonth(month, -1))
             }
           }}
@@ -105,27 +115,40 @@ export function JournalScreen({
               { target: 'calendar', title: 'Log a trade', body: 'Tap any day to record your P&L, add notes, and attach a screenshot.', tipPosition: 'above' },
             ]}
           />
-          {/* Month navigation */}
-          <div data-tour="month-nav">
-            <MonthNav
-              month={month}
-              onPrev={() => onMonthChange(shiftMonth(month, -1))}
-              onNext={() => onMonthChange(shiftMonth(month, 1))}
-            />
-          </div>
 
-          {/* Hero */}
-          <MonthHero data={journalData} currentBalance={activeAccount?.currentBalance} />
+          <AnimatePresence custom={direction} mode="popLayout" initial={false}>
+            <motion.div
+              key={month}
+              custom={direction}
+              variants={slideVariants}
+              initial="enter"
+              animate="center"
+              exit="exit"
+              transition={{ type: 'tween', ease: 'easeInOut', duration: 0.28 }}
+            >
+              {/* Month navigation */}
+              <div data-tour="month-nav">
+                <MonthNav
+                  month={month}
+                  onPrev={() => { setDirection(-1); onMonthChange(shiftMonth(month, -1)) }}
+                  onNext={() => { setDirection(1); onMonthChange(shiftMonth(month, 1)) }}
+                />
+              </div>
 
-          {/* Calendar */}
-          <div data-tour="calendar">
-            <MonthCalendar
-              month={month}
-              days={journalData.days}
-              selectedDate={selectedDate}
-              onDayPress={onDayPress}
-            />
-          </div>
+              {/* Hero */}
+              <MonthHero data={journalData} currentBalance={activeAccount?.currentBalance} />
+
+              {/* Calendar */}
+              <div data-tour="calendar">
+                <MonthCalendar
+                  month={month}
+                  days={journalData.days}
+                  selectedDate={selectedDate}
+                  onDayPress={onDayPress}
+                />
+              </div>
+            </motion.div>
+          </AnimatePresence>
         </motion.div>
 
         {/* Recent days — tablet/desktop only: stacked below the calendar at
